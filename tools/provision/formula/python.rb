@@ -8,11 +8,20 @@ class Python < AbstractOsqueryFormula
   head "https://hg.python.org/cpython", :using => :hg, :branch => "2.7"
   revision 101
 
+  # Prevent using homebrew bottles (pre-built packages) for Python when
+  # OSQUERY_DEPS environment variable is set. This effectively forces Python
+  # to be rebuilt.
+  # See:
+  #   https://elementai.atlassian.net/browse/SEC-14
+  #   https://elementai.atlassian.net/browse/SEC-15
+  #   https://github.com/facebook/osquery/issues/3373#issuecomment-305949157
+  if not ENV["OSQUERY_DEPS"]
   bottle do
     root_url "https://osquery-packages.s3.amazonaws.com/bottles"
     cellar :any_skip_relocation
     sha256 "a43f382991e2636cd1fc01619b5790898e1e40e89da94d5997cc80a0775d8a54" => :sierra
     sha256 "8245288b9906228f925215162ecba6925d23c7bf544e919ce3152d90398f738c" => :x86_64_linux
+  end
   end
 
   option :universal
