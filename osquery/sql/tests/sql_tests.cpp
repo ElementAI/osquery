@@ -154,4 +154,11 @@ TEST_F(SQLTests, test_sql_sha256) {
   EXPECT_EQ(d[0]["test"],
             "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08");
 }
+
+TEST_F(SQLTests, test_sql_regex_replace) {
+  QueryData d;
+  query("select regex_replace('5 little monkeys climbing up 1 wall', '[0-9]', '-') as test;", d);
+  EXPECT_EQ(d.size(), 1U);
+  EXPECT_EQ(d[0]["test"], "- little monkeys climbing up - wall");
+}
 }
