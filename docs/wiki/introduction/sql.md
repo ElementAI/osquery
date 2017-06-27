@@ -195,6 +195,7 @@ String parsing functions are always helpful, some help within subqueries so they
 
 - `split(COLUMN, TOKENS, INDEX)`: split `COLUMN` using any character token from `TOKENS` and return the `INDEX` result. If an `INDEX` result does not exist, a `NULL` type is returned.
 - `regex_split(COLUMN, PATTERN, INDEX)`: similar to split, but instead of `TOKENS`, apply the POSIX regex `PATTERN` (as interpreted by boost::regex).
+- `regex_replace(COLUMN, PATTERN, NEW_SUBSTRING)`: replace into `COLUMN` all substings that match the POSIX regex `PATTERN` (as interpreted by boost::regex) by `NEW_SUBSTRING`.
 - `inet_aton(IPv4_STRING)`: return the integer representation of an IPv4 string.
 
 **Hashing functions**
