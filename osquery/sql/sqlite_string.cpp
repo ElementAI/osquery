@@ -21,6 +21,7 @@
 #include <vector>
 
 #include <boost/algorithm/string/regex.hpp>
+#include <boost/algorithm/string/replace.hpp>
 #include <boost/regex.hpp>
 
 #include "osquery/core/conversions.h"
@@ -32,6 +33,10 @@ namespace osquery {
 using SplitResult = std::vector<std::string>;
 using StringSplitFunction = std::function<SplitResult(
     const std::string& input, const std::string& tokens)>;
+using StringReplaceFunction =
+    std::function<std::string(const std::string& input,
+                              const std::string& find_string,
+                              const std::string& replace_with)>;
 
 /**
  * @brief A simple SQLite column string split implementation.
@@ -73,6 +78,25 @@ static SplitResult regexSplit(const std::string& input,
   std::vector<std::string> result;
   boost::algorithm::split_regex(result, input, boost::regex(token));
   return result;
+}
+
+/**
+ * @brief A regex SQLite column string replace implementation.
+ *
+ * Search into a column value using a single or multi-character pattern and
+ * replace with a new substring. The pattern input is considered a regex.
+ *
+ * Example:
+ *   1. SELECT path FROM processes WHERE name='osqueryi' LIMIT 1;
+ *      /Users/osquery_dev/workspace/osquery/build/darwin/osquery/osqueryi
+ *   2. SELECT regex_replace(path, '/Users/[^/]+/', './') FROM processes WHERE
+ * name='osqueryi' LIMIT 1;
+ *      ./workspace/osquery/build/darwin/osquery/osqueryi
+ */
+static std::string regexReplace(const std::string& input,
+                                const std::string& pattern,
+                                const std::string& replace_with) {
+  return boost::regex_replace(input, boost::regex(pattern), replace_with);
 }
 
 static void callStringSplitFunc(sqlite3_context* context,
@@ -124,6 +148,42 @@ static void regexStringSplitFunc(sqlite3_context* context,
   callStringSplitFunc(context, argc, argv, regexSplit);
 }
 
+static void callStringReplaceFunc(sqlite3_context* context,
+                                  int argc,
+                                  sqlite3_value** argv,
+                                  StringReplaceFunction f) {
+  assert(argc == 3);
+  if (SQLITE_NULL == sqlite3_value_type(argv[0]) ||
+      SQLITE_NULL == sqlite3_value_type(argv[1]) ||
+      SQLITE_NULL == sqlite3_value_type(argv[2])) {
+    sqlite3_result_null(context);
+    return;
+  }
+
+  // Parse and verify the replace input parameters.
+  std::string input((char*)sqlite3_value_text(argv[0]));
+  std::string find_string((char*)sqlite3_value_text(argv[1]));
+  std::string replace_with((char*)sqlite3_value_text(argv[2]));
+  if (find_string.empty()) {
+    // Check if the substring to find is empty.
+    sqlite3_result_error(context, "Invalid substring to find in replace function", -1);
+    return;
+  }
+
+  auto result = f(input, find_string, replace_with);
+
+  sqlite3_result_text(context,
+                      result.c_str(),
+                      static_cast<int>(result.size()),
+                      SQLITE_TRANSIENT);
+}
+
+static void regexStringReplaceFunc(sqlite3_context* context,
+                                   int argc,
+                                   sqlite3_value** argv) {
+  callStringReplaceFunc(context, argc, argv, regexReplace);
+}
+
 /**
  * @brief Convert an IPv4 string address to decimal.
  */
@@ -167,6 +227,14 @@ void registerStringExtensions(sqlite3* db) {
                           SQLITE_UTF8,
                           nullptr,
                           regexStringSplitFunc,
+                          nullptr,
+                          nullptr);
+  sqlite3_create_function(db,
+                          "regex_replace",
+                          3,
+                          SQLITE_UTF8,
+                          nullptr,
+                          regexStringReplaceFunc,
                           nullptr,
                           nullptr);
   sqlite3_create_function(db,
