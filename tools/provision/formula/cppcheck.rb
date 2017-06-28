@@ -8,11 +8,20 @@ class Cppcheck < AbstractOsqueryFormula
   head "https://github.com/danmar/cppcheck.git"
   revision 101
 
+  # Prevent using homebrew bottles (pre-built packages) for cppcheck when
+  # OSQUERY_DEPS environment variable is set. This effectively forces cppcheck
+  # to be rebuilt, required so that it can find its `std.cfg` file.
+  # See:
+  #   https://elementai.atlassian.net/browse/SEC-14
+  #   https://elementai.atlassian.net/browse/SEC-15
+  #   https://github.com/facebook/osquery/issues/3373#issuecomment-305949157
+  if not ENV["OSQUERY_DEPS"]
   bottle do
     root_url "https://osquery-packages.s3.amazonaws.com/bottles"
     cellar :any_skip_relocation
     sha256 "f2a840d08824c49920678b68dd80b90e8b2fb542cc798c546600aa7e4997b018" => :sierra
     sha256 "c90661a8669334718bab86d6768933dfed61c1d3f5c1c0fc16bfd679ac6dd7c3" => :x86_64_linux
+  end
   end
 
   option "without-rules", "Build without rules (no pcre dependency)"
