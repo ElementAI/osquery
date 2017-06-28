@@ -164,14 +164,20 @@ TEST_F(SQLTests, test_sql_regex_split) {
 
 TEST_F(SQLTests, test_sql_regex_replace) {
   QueryData d;
-  query("select regex_replace('5 little monkeys climbing up 1 wall', '[0-9]', '-') as test;", d);
+  query(
+      "select regex_replace('5 little monkeys climbing up 1 wall', '[0-9]', "
+      "'-') as test;",
+      d);
   EXPECT_EQ(d.size(), 1U);
   EXPECT_EQ(d[0]["test"], "- little monkeys climbing up - wall");
 }
 
 TEST_F(SQLTests, test_sql_regex_replace_with_empty_pattern) {
   QueryData d;
-  query("select regex_replace('5 little monkeys climbing up 1 wall', '', '-') as test;", d);
+  query(
+      "select regex_replace('5 little monkeys climbing up 1 wall', '', '-') as "
+      "test;",
+      d);
   EXPECT_EQ(d.size(), 0);
 }
 
@@ -184,7 +190,10 @@ TEST_F(SQLTests, test_sql_regex_replace_with_empty_input) {
 
 TEST_F(SQLTests, test_sql_regex_replace_without_match) {
   QueryData d;
-  query("select regex_replace('Mama said the monkeys,not to fight|-selection_end', '[0-9]', '-') as test;", d);
+  query(
+      "select regex_replace('Mama said the monkeys,not to "
+      "fight|-selection_end', '[0-9]', '-') as test;",
+      d);
   EXPECT_EQ(d.size(), 1U);
   EXPECT_EQ(d[0]["test"], "Mama said the monkeys,not to fight|-selection_end");
 }
