@@ -79,6 +79,7 @@ static SplitResult regexSplit(const std::string& input,
   boost::algorithm::split_regex(result, input, boost::regex(token));
   return result;
 }
+
 /**
  * @brief A regex SQLite column string replace implementation.
  *
