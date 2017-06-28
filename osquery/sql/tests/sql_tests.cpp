@@ -191,10 +191,10 @@ TEST_F(SQLTests, test_sql_regex_replace_with_empty_input) {
 TEST_F(SQLTests, test_sql_regex_replace_without_match) {
   QueryData d;
   query(
-      "select regex_replace('Mama said the monkeys,not to "
-      "fight|-selection_end', '[0-9]', '-') as test;",
+      "select regex_replace('Mama said the monkeys,not to fight',"
+      " '[0-9]', '-') as test;",
       d);
   EXPECT_EQ(d.size(), 1U);
-  EXPECT_EQ(d[0]["test"], "Mama said the monkeys,not to fight|-selection_end");
+  EXPECT_EQ(d[0]["test"], "Mama said the monkeys,not to fight");
 }
 }
