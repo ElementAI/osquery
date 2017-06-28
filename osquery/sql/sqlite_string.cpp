@@ -161,7 +161,7 @@ static void callStringReplaceFunc(sqlite3_context* context,
   std::string find_string((char*)sqlite3_value_text(argv[1]));
   std::string replace_with((char*)sqlite3_value_text(argv[2]));
   if (find_string.empty()) {
-    // Allow the input string to be empty.
+    // Check if the substring to find is empty.
     sqlite3_result_error(context, "Invalid input to replace function", -1);
     return;
   }
