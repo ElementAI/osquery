@@ -33,8 +33,10 @@ namespace osquery {
 using SplitResult = std::vector<std::string>;
 using StringSplitFunction = std::function<SplitResult(
     const std::string& input, const std::string& tokens)>;
-using StringReplaceFunction = std::function<std::string(
-    const std::string& input, const std::string& find_string, const std::string& replace_with)>;
+using StringReplaceFunction =
+    std::function<std::string(const std::string& input,
+                              const std::string& find_string,
+                              const std::string& replace_with)>;
 
 /**
  * @brief A simple SQLite column string split implementation.
@@ -80,13 +82,14 @@ static SplitResult regexSplit(const std::string& input,
 /**
  * @brief A regex SQLite column string replace implementation.
  *
- * Search into a column value using a single or multi-character pattern and replace
- * with a new substring. The pattern input is considered a regex.
+ * Search into a column value using a single or multi-character pattern and
+ * replace with a new substring. The pattern input is considered a regex.
  *
  * Example:
  *   1. SELECT path FROM processes WHERE name='osqueryi' LIMIT 1;
  *      /Users/osquery_dev/workspace/osquery/build/darwin/osquery/osqueryi
- *   2. SELECT regex_replace(path, '/Users/[^/]+/', './') FROM processes WHERE name='osqueryi' LIMIT 1;
+ *   2. SELECT regex_replace(path, '/Users/[^/]+/', './') FROM processes WHERE
+ * name='osqueryi' LIMIT 1;
  *      ./workspace/osquery/build/darwin/osquery/osqueryi
  */
 static std::string regexReplace(const std::string& input,
