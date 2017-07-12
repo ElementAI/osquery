@@ -53,6 +53,7 @@ OSQUERY_EXAMPLE_CONFIG_DST="/usr/share/osquery/osquery.example.conf"
 OSQUERY_LOG_DIR="/var/log/osquery/"
 OSQUERY_VAR_DIR="/var/osquery"
 OSQUERY_ETC_DIR="/etc/osquery"
+OSQUERY_PKG_INCLUDE_DIRS=()
 
 WORKING_DIR=/tmp/osquery_packaging
 INSTALL_PREFIX=$WORKING_DIR/prefix
@@ -92,6 +93,9 @@ function parse_args() {
                               ;;
       -c | --config )         shift
                               OSQUERY_CONFIG_SRC=$1
+                              ;;
+      -i | --include-dir )    shift
+                              OSQUERY_PKG_INCLUDE_DIRS[${#OSQUERY_PKG_INCLUDE_DIRS}]=$1
                               ;;
       -h | --help )           usage
                               ;;
@@ -187,6 +191,14 @@ function main() {
     #Change config path in service unit
     sed -i 's/sysconfig/default/g' $INSTALL_PREFIX$SYSTEMD_SERVICE_DST
   fi
+
+  # Copy extra files to the install prefix so that they get packaged too.
+  # NOTE: Files will be overwritten.
+  for include_dir in ${OSQUERY_PKG_INCLUDE_DIRS[*]}; do
+    log "adding $include_dir in the package prefix to be included in the package"
+    cp -fR $include_dir/* $INSTALL_PREFIX/
+  done
+
 
   log "creating $PACKAGE_TYPE package"
   IFS=',' read -a deps <<< "$PACKAGE_DEPENDENCIES"
